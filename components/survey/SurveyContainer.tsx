@@ -33,6 +33,12 @@ function toggleInList(list: string[], item: string) {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
+function getRating(data: SurveyData, id: string) {
+  return (
+    data.ratings[id] ?? { stars: 0, note: "", preferredVariant: "" }
+  );
+}
+
 export function SurveyContainer() {
   const [step, setStep] = useState<StepId>("intro");
   const [data, setData] = useState<SurveyData>(DEFAULT_DATA);
@@ -187,16 +193,19 @@ export function SurveyContainer() {
                     onRate={(id, stars) =>
                       update("ratings", {
                         ...data.ratings,
-                        [id]: { ...(data.ratings[id] ?? { note: "" }), stars },
+                        [id]: { ...getRating(data, id), stars },
                       })
                     }
                     onNote={(id, note) =>
                       update("ratings", {
                         ...data.ratings,
-                        [id]: {
-                          ...(data.ratings[id] ?? { stars: 0 }),
-                          note,
-                        },
+                        [id]: { ...getRating(data, id), note },
+                      })
+                    }
+                    onVariant={(id, preferredVariant) =>
+                      update("ratings", {
+                        ...data.ratings,
+                        [id]: { ...getRating(data, id), preferredVariant },
                       })
                     }
                     onFavorite={(id) => update("favoriteConceptId", id)}
@@ -357,7 +366,7 @@ function IntroHero({ onStart }: { onStart: () => void }) {
           {[
             {
               num: "01",
-              label: "Rate 6 concepts",
+              label: "Rate 5 logo sets",
               desc: "Star-rate each one, jot a quick thought.",
             },
             {

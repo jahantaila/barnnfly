@@ -24,6 +24,7 @@ export const STEP_LABELS: Record<StepId, string> = {
 export type LogoRating = {
   stars: number; // 0 = unrated, 1–5
   note: string;
+  preferredVariant: string; // when a set contains multiple variants
 };
 
 export type SurveyData = {
@@ -77,12 +78,55 @@ export const VIBE_OPTIONS = [
   { label: "Premium rugged", emoji: "🏔️" },
 ];
 
-// The logo concepts to rate — drop images into /public/logos/
-export const LOGO_CONCEPTS = [
-  { id: "concept-1", src: "/logos/concept-1.png", label: "Concept 01" },
-  { id: "concept-2", src: "/logos/concept-2.png", label: "Concept 02" },
-  { id: "concept-3", src: "/logos/concept-3.png", label: "Concept 03" },
-  { id: "concept-4", src: "/logos/concept-4.png", label: "Concept 04" },
-  { id: "concept-5", src: "/logos/concept-5.png", label: "Concept 05" },
-  { id: "concept-6", src: "/logos/concept-6.png", label: "Concept 06" },
+// Logo concept sets to rate. Some sets contain multiple variants in the
+// same image — the UI prompts raters to call out which one they prefer.
+export type LogoConcept = {
+  id: string;
+  src: string;
+  label: string;
+  description?: string;
+  variantCount: number;
+};
+
+export const LOGO_CONCEPTS: LogoConcept[] = [
+  {
+    id: "set-01",
+    src: "/logos/set-01-jason-fav.png",
+    label: "Set 01 · Vintage aviator",
+    description:
+      "Full illustration — golden retriever in aviator gear flying a vintage plane. 'Bark N Fly Resort' wordmark below with luggage tags.",
+    variantCount: 1,
+  },
+  {
+    id: "set-02",
+    src: "/logos/set-02-fancy.png",
+    label: "Set 02 · Script variants",
+    description:
+      "Two takes: the full illustrated scene + a simplified version with a scripted 'BarkNFly'. Which version + which wordmark style?",
+    variantCount: 2,
+  },
+  {
+    id: "set-03",
+    src: "/logos/set-03-four-iterations.png",
+    label: "Set 03 · Four iterations",
+    description:
+      "Four different lockups — control tower badge, crest, palm-tree scene, and full resort illustration. Tell us which feels most 'Bark & Fly'.",
+    variantCount: 4,
+  },
+  {
+    id: "set-04",
+    src: "/logos/set-04-three-iterations.png",
+    label: "Set 04 · Three iterations",
+    description:
+      "Three green-and-gold lockups — banner style, crest, and circular badge with the same flying retriever. Which frame fits best?",
+    variantCount: 3,
+  },
+  {
+    id: "set-05",
+    src: "/logos/set-05-jahan.png",
+    label: "Set 05 · Circular badge",
+    description:
+      "Circular badge: golden retriever popping out of a plane, framed by 'BARK N FLY · PET RESORT' and a small bone.",
+    variantCount: 1,
+  },
 ];
