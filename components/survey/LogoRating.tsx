@@ -98,28 +98,37 @@ export function LogoRatingStep({
                     {c.src}
                   </span>
                 </div>
+              ) : hasMultiple ? (
+                // Multi-variant sheets: block scroll container on mobile
+                // (flex + justify-center was hijacking overflow scrolling).
+                // On sm+ the image fits full card width and scrolling is off.
+                <div className="relative w-full overflow-x-auto sm:overflow-visible overscroll-x-contain touch-pan-x">
+                  <div className="p-3 sm:p-6 inline-block sm:block align-top min-w-full">
+                    <Image
+                      src={c.src}
+                      alt={c.label}
+                      width={2400}
+                      height={1800}
+                      priority={idx < 2}
+                      className={`block h-auto max-w-none sm:w-full sm:max-w-full ${variantWidthClass(
+                        c.variantCount
+                      )}`}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1400px) 92vw, 1300px"
+                      onError={() =>
+                        setImgError((s) => ({ ...s, [c.id]: true }))
+                      }
+                    />
+                  </div>
+                </div>
               ) : (
-                <div
-                  className={`relative w-full flex items-center justify-center p-3 sm:p-6 ${
-                    hasMultiple ? "overflow-x-auto" : ""
-                  }`}
-                >
+                <div className="relative w-full flex items-center justify-center p-3 sm:p-6">
                   <Image
                     src={c.src}
                     alt={c.label}
                     width={2400}
                     height={1800}
                     priority={idx < 2}
-                    className="h-auto max-w-full"
-                    style={{
-                      // Enforce a minimum rendered width on mobile for
-                      // multi-variant sheets so each sub-logo is readable.
-                      // Falls back to natural w-full on sm: and up.
-                      minWidth: hasMultiple
-                        ? minWidthForVariants(c.variantCount)
-                        : undefined,
-                      width: hasMultiple ? undefined : "100%",
-                    }}
+                    className="w-full h-auto max-w-full"
                     sizes="(max-width: 768px) 100vw, (max-width: 1400px) 92vw, 1300px"
                     onError={() =>
                       setImgError((s) => ({ ...s, [c.id]: true }))
@@ -211,12 +220,12 @@ export function LogoRatingStep({
   );
 }
 
-function minWidthForVariants(count: number) {
-  // Target ~230–260px per sub-logo on mobile so each remains readable.
-  if (count <= 1) return undefined;
-  if (count === 2) return "520px";
-  if (count === 3) return "720px";
-  return "880px"; // 4+ variants
+// Tailwind-literal width classes so JIT picks them up at build time.
+// Target ~230-260px per sub-logo on mobile; desktop (sm+) falls back to w-full.
+function variantWidthClass(count: number): string {
+  if (count === 2) return "w-[520px]";
+  if (count === 3) return "w-[720px]";
+  return "w-[880px]"; // 4+ variants
 }
 
 const STAR_LABELS: Record<number, string> = {
