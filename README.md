@@ -57,6 +57,23 @@ In development, `POST /api/submit` appends each response to
 Replace the handler in `app/api/submit/route.ts` with your real destination
 (Airtable, HubSpot, Resend email, Slack webhook, DB…) before going to prod.
 
+## Embedding in WordPress
+
+The survey ships with a drop-in WordPress embed. Paste this into any Custom
+HTML block (replace `YOUR-DEPLOY-URL` with your hosted app URL):
+
+```html
+<div id="barknfly-survey"></div>
+<script src="https://YOUR-DEPLOY-URL/embed.js" defer></script>
+```
+
+Features: auto-resize iframe, mobile-responsive, lazy-loaded, scoped CSP
+headers. See [EMBED.md](EMBED.md) for full instructions, options, and
+troubleshooting.
+
+Preview locally at `/embed-preview` — it simulates a WordPress page hosting
+the embed so you can see exactly what partners will see.
+
 ## Branding
 
 - Derby Digital logo: `public/derby-logo.svg` — shown in the header, footer, and a "Powered by" inline badge
