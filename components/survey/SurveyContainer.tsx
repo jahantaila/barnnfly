@@ -9,20 +9,13 @@ import { DerbyBadge } from "@/components/DerbyBadge";
 import { ProgressBar } from "./ProgressBar";
 import { StepShell } from "./StepShell";
 import { OptionGrid } from "./OptionGrid";
-import { PaletteCard } from "./PaletteCard";
-import { LogoVote } from "./LogoVote";
+import { LogoRatingStep } from "./LogoRating";
 import {
-  BUSINESS_STAGES,
   DEFAULT_DATA,
-  IMAGERY_OPTIONS,
-  LOGO_STYLE_OPTIONS,
-  PALETTE_OPTIONS,
-  PERSONALITY_OPTIONS,
-  PET_OPTIONS,
-  PRICE_TIERS,
-  SERVICE_OPTIONS,
+  LOGO_CONCEPTS,
+  RELATIONSHIP_OPTIONS,
   STEP_ORDER,
-  TONE_OPTIONS,
+  VIBE_OPTIONS,
   type StepId,
   type SurveyData,
 } from "@/lib/survey-config";
@@ -34,7 +27,7 @@ const HeroCanvas = dynamic(() => import("@/components/three/HeroCanvas"), {
   ),
 });
 
-const STORAGE_KEY = "barknfly_survey_v1";
+const STORAGE_KEY = "barknfly_survey_v2";
 
 function toggleInList(list: string[], item: string) {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
@@ -79,30 +72,26 @@ export function SurveyContainer() {
     }
   };
 
+  const ratedCount = useMemo(
+    () =>
+      Object.values(data.ratings).filter((r) => r && r.stars > 0).length,
+    [data.ratings]
+  );
+
   const canProceed = useMemo(() => {
     switch (step) {
       case "intro":
         return true;
       case "about-you":
-        return data.fullName.trim().length > 1 && /\S+@\S+\.\S+/.test(data.email);
-      case "vision":
-        return data.businessStage.length > 0 && data.services.length > 0;
-      case "audience":
-        return data.priceTier.length > 0 && data.petTypes.length > 0;
-      case "personality":
-        return data.personality.length >= 2;
-      case "logo-direction":
-        return data.logoStyles.length > 0;
-      case "palette":
-        return data.palette.length > 0;
-      case "logo-vote":
-        return true;
-      case "voice":
-        return data.toneAdjectives.length > 0;
+        return data.fullName.trim().length > 1 && data.relationship.length > 0;
+      case "rate-logos":
+        return ratedCount >= 1; // at least one logo rated
+      case "vibe":
+        return data.vibes.length >= 1;
       case "review":
         return true;
     }
-  }, [step, data]);
+  }, [step, data, ratedCount]);
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -132,8 +121,8 @@ export function SurveyContainer() {
       {step === "intro" ? (
         <IntroHero onStart={() => setStep("about-you")} />
       ) : (
-        <main className="flex-1 w-full max-w-4xl mx-auto px-6 md:px-10 py-10 md:py-16 relative z-10">
-          <div className="mb-10">
+        <main className="flex-1 w-full max-w-5xl mx-auto px-6 md:px-10 py-10 md:py-14 relative z-10">
+          <div className="mb-8">
             <ProgressBar current={step} />
           </div>
 
@@ -144,308 +133,117 @@ export function SurveyContainer() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.28, ease: "easeOut" }}
             >
-              <div>
-                {step === "about-you" && (
-                  <StepShell
-                    eyebrow="Step 01 · Who you are"
-                    title="Let's get to know"
-                    titleAccent="you."
-                    subtitle="We'll use this to tailor concepts and send your brand package."
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Field
-                        label="Full name"
-                        required
-                        value={data.fullName}
-                        onChange={(v) => update("fullName", v)}
-                        placeholder="Jane Doe"
-                      />
-                      <Field
-                        label="Role / title"
-                        value={data.role}
-                        onChange={(v) => update("role", v)}
-                        placeholder="Founder, Owner, GM…"
-                      />
-                      <Field
-                        label="Email"
-                        required
-                        type="email"
-                        value={data.email}
-                        onChange={(v) => update("email", v)}
-                        placeholder="you@barknfly.com"
-                      />
-                      <Field
-                        label="Phone"
-                        type="tel"
-                        value={data.phone}
-                        onChange={(v) => update("phone", v)}
-                        placeholder="(555) 867-5309"
-                      />
-                    </div>
-                  </StepShell>
-                )}
-
-                {step === "vision" && (
-                  <StepShell
-                    eyebrow="Step 02 · The vision"
-                    title="What is Bark"
-                    titleAccent="& Fly?"
-                    subtitle="Tell us where you are in the journey and what the resort will offer."
-                  >
-                    <div className="flex flex-col gap-2">
-                      <Label>Where are you in the journey?</Label>
-                      <OptionGrid
-                        options={BUSINESS_STAGES.map((s) => ({ label: s }))}
-                        selected={
-                          data.businessStage ? [data.businessStage] : []
-                        }
-                        onToggle={(v) =>
-                          update("businessStage", v === data.businessStage ? "" : v)
-                        }
-                        multi={false}
-                        cols={2}
-                      />
-                    </div>
+              {step === "about-you" && (
+                <StepShell
+                  eyebrow="Step 01 · Say hi"
+                  title="First, who's"
+                  titleAccent="rating?"
+                  subtitle="We're asking friends, family, and pet people to help us pick the Bark & Fly logo. Takes ~3 minutes."
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field
-                      label="City / service area"
-                      value={data.location}
-                      onChange={(v) => update("location", v)}
-                      placeholder="e.g., Nashville, TN"
+                      label="Your name"
+                      required
+                      value={data.fullName}
+                      onChange={(v) => update("fullName", v)}
+                      placeholder="Taylor"
                     />
-                    <div className="flex flex-col gap-2">
-                      <Label>Services offered (pick all that apply)</Label>
-                      <OptionGrid
-                        options={SERVICE_OPTIONS}
-                        selected={data.services}
-                        onToggle={(v) =>
-                          update("services", toggleInList(data.services, v))
-                        }
-                        cols={2}
-                      />
-                    </div>
-                    <TextArea
-                      label="What's the one thing that'll make Bark & Fly different?"
-                      value={data.uniqueValue}
-                      onChange={(v) => update("uniqueValue", v)}
-                      placeholder="e.g., airport proximity, live webcams, luxury suites…"
+                    <Field
+                      label="Email (optional)"
+                      type="email"
+                      value={data.email}
+                      onChange={(v) => update("email", v)}
+                      placeholder="In case we want to follow up"
                     />
-                  </StepShell>
-                )}
-
-                {step === "audience" && (
-                  <StepShell
-                    eyebrow="Step 03 · Dream customer"
-                    title="Who are we"
-                    titleAccent="building for?"
-                  >
-                    <TextArea
-                      label="Describe your dream customer in a sentence."
-                      value={data.dreamCustomer}
-                      onChange={(v) => update("dreamCustomer", v)}
-                      placeholder="e.g., busy professionals flying out of the airport who want 5-star care for their dogs"
-                    />
-                    <div className="flex flex-col gap-2">
-                      <Label>Who do you serve?</Label>
-                      <OptionGrid
-                        options={PET_OPTIONS}
-                        selected={data.petTypes}
-                        onToggle={(v) =>
-                          update("petTypes", toggleInList(data.petTypes, v))
-                        }
-                        cols={3}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Label>Price positioning</Label>
-                      <OptionGrid
-                        options={PRICE_TIERS.map((t) => ({
-                          label: t.label,
-                          desc: t.sub,
-                        }))}
-                        selected={
-                          data.priceTier
-                            ? [
-                                PRICE_TIERS.find(
-                                  (t) => t.value === data.priceTier
-                                )?.label ?? "",
-                              ]
-                            : []
-                        }
-                        onToggle={(label) => {
-                          const tier = PRICE_TIERS.find(
-                            (t) => t.label === label
-                          );
-                          update(
-                            "priceTier",
-                            tier && tier.value !== data.priceTier
-                              ? tier.value
-                              : ""
-                          );
-                        }}
-                        multi={false}
-                        cols={2}
-                      />
-                    </div>
-                  </StepShell>
-                )}
-
-                {step === "personality" && (
-                  <StepShell
-                    eyebrow="Step 04 · Personality"
-                    title="How should the"
-                    titleAccent="brand feel?"
-                    subtitle="Pick at least 2–4 that capture the vibe. Pairs work great ('playful + premium')."
-                  >
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label>How do you know us?</Label>
                     <OptionGrid
-                      options={PERSONALITY_OPTIONS}
-                      selected={data.personality}
+                      options={RELATIONSHIP_OPTIONS}
+                      selected={data.relationship ? [data.relationship] : []}
                       onToggle={(v) =>
-                        update("personality", toggleInList(data.personality, v))
+                        update(
+                          "relationship",
+                          v === data.relationship ? "" : v
+                        )
                       }
+                      multi={false}
                       cols={3}
                     />
-                    <TextArea
-                      label="Anything the brand absolutely shouldn't feel like?"
-                      value={data.dealBreakers}
-                      onChange={(v) => update("dealBreakers", v)}
-                      placeholder="e.g., clinical, cheap, kiddie-cartoonish"
-                    />
-                  </StepShell>
-                )}
+                  </div>
+                </StepShell>
+              )}
 
-                {step === "logo-direction" && (
-                  <StepShell
-                    eyebrow="Step 05 · Logo direction"
-                    title="How should the"
-                    titleAccent="logo look?"
-                    subtitle="Pick the style(s) + any imagery you'd love to see explored."
-                  >
-                    <div className="flex flex-col gap-2">
-                      <Label>Logo styles to explore</Label>
-                      <OptionGrid
-                        options={LOGO_STYLE_OPTIONS}
-                        selected={data.logoStyles}
-                        onToggle={(v) =>
-                          update("logoStyles", toggleInList(data.logoStyles, v))
-                        }
-                        cols={2}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Label>Imagery you'd love to see considered</Label>
-                      <OptionGrid
-                        options={IMAGERY_OPTIONS}
-                        selected={data.imagery}
-                        onToggle={(v) =>
-                          update("imagery", toggleInList(data.imagery, v))
-                        }
-                        cols={3}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <TextArea
-                        label="A brand you admire (in any industry)"
-                        value={data.competitorLoves}
-                        onChange={(v) => update("competitorLoves", v)}
-                        placeholder="e.g., Chewy, Bark, Four Seasons…"
-                      />
-                      <TextArea
-                        label="A brand that's NOT you"
-                        value={data.competitorAvoids}
-                        onChange={(v) => update("competitorAvoids", v)}
-                        placeholder="e.g., Petco vibes, big-box feel…"
-                      />
-                    </div>
-                  </StepShell>
-                )}
+              {step === "rate-logos" && (
+                <StepShell
+                  eyebrow={`Step 02 · Rate the logos (${ratedCount}/${LOGO_CONCEPTS.length})`}
+                  title="Rate every"
+                  titleAccent="logo."
+                  subtitle="Give each concept 1–5 stars. Leave a quick thought if you feel like it. Then tap ★ on your favorite."
+                >
+                  <LogoRatingStep
+                    ratings={data.ratings}
+                    favoriteConceptId={data.favoriteConceptId}
+                    onRate={(id, stars) =>
+                      update("ratings", {
+                        ...data.ratings,
+                        [id]: { ...(data.ratings[id] ?? { note: "" }), stars },
+                      })
+                    }
+                    onNote={(id, note) =>
+                      update("ratings", {
+                        ...data.ratings,
+                        [id]: {
+                          ...(data.ratings[id] ?? { stars: 0 }),
+                          note,
+                        },
+                      })
+                    }
+                    onFavorite={(id) => update("favoriteConceptId", id)}
+                  />
+                </StepShell>
+              )}
 
-                {step === "palette" && (
-                  <StepShell
-                    eyebrow="Step 06 · Palette"
-                    title="Pick a color"
-                    titleAccent="direction."
-                    subtitle="We'll refine the exact hex values in design — just pick the vibe closest to Bark & Fly."
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {PALETTE_OPTIONS.map((p) => (
-                        <PaletteCard
-                          key={p.id}
-                          {...p}
-                          selected={data.palette === p.id}
-                          onSelect={(id) =>
-                            update("palette", id === data.palette ? "" : id)
-                          }
-                        />
-                      ))}
-                    </div>
-                  </StepShell>
-                )}
+              {step === "vibe" && (
+                <StepShell
+                  eyebrow="Step 03 · Vibe check"
+                  title="What should the"
+                  titleAccent="brand feel like?"
+                  subtitle="Pick at least one. Pairs work great — 'playful + premium' says a lot."
+                >
+                  <OptionGrid
+                    options={VIBE_OPTIONS}
+                    selected={data.vibes}
+                    onToggle={(v) =>
+                      update("vibes", toggleInList(data.vibes, v))
+                    }
+                    cols={3}
+                  />
+                  <TextArea
+                    label="If you were naming a pet resort, what would you call it? (optional)"
+                    value={data.nameSuggestion}
+                    onChange={(v) => update("nameSuggestion", v)}
+                    placeholder="Bark & Fly is the current name — but if you've got a better one, we want to hear it."
+                  />
+                  <TextArea
+                    label="Anything else we should know?"
+                    value={data.anythingElse}
+                    onChange={(v) => update("anythingElse", v)}
+                    placeholder="Designs you love, brands that inspire, wild ideas…"
+                  />
+                </StepShell>
+              )}
 
-                {step === "logo-vote" && (
-                  <StepShell
-                    eyebrow="Step 07 · Logo vote"
-                    title="Vote on the"
-                    titleAccent="concepts."
-                    subtitle="Rate each concept and mark your overall favorite. Placeholders show where the Bark & Fly logo tests will live."
-                  >
-                    <LogoVote
-                      votes={data.logoVotes}
-                      favorite={data.logoFavorite}
-                      feedback={data.logoFeedback}
-                      onVote={(id, v) =>
-                        update("logoVotes", { ...data.logoVotes, [id]: v })
-                      }
-                      onFavorite={(id) => update("logoFavorite", id)}
-                      onFeedback={(v) => update("logoFeedback", v)}
-                    />
-                  </StepShell>
-                )}
-
-                {step === "voice" && (
-                  <StepShell
-                    eyebrow="Step 08 · Voice"
-                    title="How does Bark & Fly"
-                    titleAccent="sound?"
-                  >
-                    <Field
-                      label="Tagline or elevator pitch (optional)"
-                      value={data.tagline}
-                      onChange={(v) => update("tagline", v)}
-                      placeholder="e.g., First-class care before takeoff."
-                    />
-                    <div className="flex flex-col gap-2">
-                      <Label>Pick the tones that fit</Label>
-                      <OptionGrid
-                        options={TONE_OPTIONS}
-                        selected={data.toneAdjectives}
-                        onToggle={(v) =>
-                          update(
-                            "toneAdjectives",
-                            toggleInList(data.toneAdjectives, v)
-                          )
-                        }
-                        cols={3}
-                      />
-                    </div>
-                    <TextArea
-                      label="Anything else we should know?"
-                      value={data.anythingElse}
-                      onChange={(v) => update("anythingElse", v)}
-                      placeholder="Timelines, hard constraints, must-haves, partner names…"
-                    />
-                  </StepShell>
-                )}
-
-                {step === "review" && (
-                  <StepShell
-                    eyebrow="Step 09 · Review"
-                    title="Lock it in."
-                    subtitle="Here's what you told us. Hit submit and our Derby Digital team takes it from here."
-                  >
-                    <ReviewSummary data={data} />
-                  </StepShell>
-                )}
-              </div>
+              {step === "review" && (
+                <StepShell
+                  eyebrow="Step 04 · Review"
+                  title="That's it."
+                  titleAccent="Lock it in?"
+                  subtitle="Here's your feedback. Hit submit and we'll factor it into the final pick."
+                >
+                  <ReviewSummary data={data} />
+                </StepShell>
+              )}
             </motion.div>
 
             <div className="mt-10 flex items-center justify-between gap-4 border-t border-derby-line pt-6">
@@ -465,7 +263,7 @@ export function SurveyContainer() {
                   onClick={handleSubmit}
                   disabled={submitting}
                 >
-                  {submitting ? "Submitting…" : "Submit survey →"}
+                  {submitting ? "Submitting…" : "Submit feedback →"}
                 </button>
               ) : (
                 <button
@@ -489,11 +287,11 @@ export function SurveyContainer() {
 
 function TopNav() {
   return (
-    <header className="sticky top-0 z-30 bg-[color:var(--background)]/80 backdrop-blur border-b border-derby-line">
+    <header className="sticky top-0 z-30 bg-[color:var(--background)]/85 backdrop-blur border-b border-derby-line">
       <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
         <DerbyBadge variant="header" />
         <div className="hidden sm:flex items-center gap-3">
-          <span className="chip">Bark &amp; Fly · Brand Survey</span>
+          <span className="chip">Bark &amp; Fly · Logo Vote</span>
         </div>
       </div>
     </header>
@@ -503,72 +301,94 @@ function TopNav() {
 function IntroHero({ onStart }: { onStart: () => void }) {
   return (
     <main className="flex-1 relative overflow-hidden">
-      <div className="absolute inset-0 -z-0">
-        <div className="absolute inset-0 pointer-events-none">
-          <HeroCanvas />
+      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 pt-10 md:pt-16 pb-16">
+        <div className="grid grid-cols-1 md:grid-cols-[1.15fr_1fr] gap-10 md:gap-12 items-center">
+          {/* Text column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="flex flex-col gap-6"
+          >
+            <DerbyBadge variant="inline" className="self-start" />
+            <h1 className="display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] text-derby-ink">
+              Help pick our
+              <br />
+              <span className="text-derby">logo.</span>
+            </h1>
+            <p className="max-w-xl text-lg md:text-xl text-derby-ink/70 leading-relaxed">
+              We&apos;re launching <strong>Bark &amp; Fly Pet Resort</strong>,
+              and we need your eye. Rate the logo concepts, pick your
+              favorite, and tell us the vibe. Takes about 3 minutes.
+            </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
+              <button className="btn-primary" onClick={onStart}>
+                Start rating →
+              </button>
+              <span className="text-sm text-derby-ink/60">
+                4 steps · ~3 minutes · auto-saves
+              </span>
+            </div>
+          </motion.div>
+
+          {/* 3D column */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
+            className="relative h-[320px] md:h-[460px] order-first md:order-last"
+          >
+            <div className="absolute inset-0">
+              <HeroCanvas />
+            </div>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-[0.22em] text-derby-ink/40">
+              Bark &amp; Fly
+            </div>
+          </motion.div>
         </div>
-      </div>
-      <div className="relative z-10 max-w-5xl mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-20">
+
+        {/* Feature row */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex flex-col items-center text-center gap-6"
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="mt-14 md:mt-20 grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
-          <DerbyBadge variant="inline" />
-          <h1 className="display text-[14vw] sm:text-7xl md:text-8xl text-derby-ink leading-[0.9]">
-            Let&apos;s brand
-            <br />
-            <span className="text-derby">Bark &amp; Fly.</span>
-          </h1>
-          <p className="max-w-2xl text-lg md:text-xl text-derby-ink/70 leading-relaxed">
-            A 5-minute founder survey to lock in the logo, palette, voice, and
-            positioning for your new pet resort. Every answer shapes what your
-            Derby Digital team builds.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center gap-3 mt-4">
-            <button className="btn-primary" onClick={onStart}>
-              Start the survey →
-            </button>
-            <span className="text-sm text-derby-ink/60">
-              9 quick steps · ~5 minutes · auto-saves
-            </span>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25 }}
-          className="mt-16 md:mt-24"
-        >
-          <div className="card p-6 sm:p-8 max-w-3xl mx-auto">
-            <div className="text-xs font-bold uppercase tracking-[0.18em] text-derby-ink/60 mb-5">
-              What you&apos;ll help us shape
+          {[
+            {
+              num: "01",
+              label: "Rate 6 concepts",
+              desc: "Star-rate each one, jot a quick thought.",
+            },
+            {
+              num: "02",
+              label: "Pick your favorite",
+              desc: "One logo to rule them all.",
+            },
+            {
+              num: "03",
+              label: "Call the vibe",
+              desc: "What should the brand feel like?",
+            },
+          ].map((row) => (
+            <div
+              key={row.num}
+              className="card p-5 flex gap-4 items-start"
+            >
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-derby">
+                {row.num}
+              </span>
+              <div>
+                <div className="font-bold text-derby-ink">{row.label}</div>
+                <div className="text-sm text-derby-ink/60 mt-0.5">
+                  {row.desc}
+                </div>
+              </div>
             </div>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { icon: "◆", label: "Brand personality & voice" },
-                { icon: "✦", label: "Logo direction and imagery" },
-                { icon: "●", label: "Color palette and vibe" },
-                { icon: "▲", label: "Target customer positioning" },
-                { icon: "◎", label: "Logo concept voting" },
-                { icon: "✺", label: "Services and differentiators" },
-              ].map((row) => (
-                <li key={row.label} className="flex items-center gap-3">
-                  <span className="h-10 w-10 rounded-xl bg-derby-soft text-derby font-bold flex items-center justify-center text-base">
-                    {row.icon}
-                  </span>
-                  <span className="text-derby-ink font-medium">
-                    {row.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          ))}
         </motion.div>
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-12 flex justify-center">
           <FooterMark />
         </div>
       </div>
@@ -588,13 +408,13 @@ function ThankYou() {
         >
           <div className="chip chip-blue">Received · Thank you</div>
           <h1 className="display text-5xl md:text-7xl">
-            <span>You just kicked off</span>
+            <span>You just shaped</span>
             <br />
             <span className="text-derby">Bark &amp; Fly.</span>
           </h1>
           <p className="text-lg text-derby-ink/70">
-            Our Derby Digital team will review your answers and come back within
-            2–3 business days with the first round of concepts.
+            Every rating, every favorite, every note — it all factors into the
+            final logo. Thanks for taking the time.
           </p>
           <Link href="/" className="btn-primary">
             Back to start →
@@ -669,55 +489,92 @@ function Label({ children }: { children: React.ReactNode }) {
 }
 
 function ReviewSummary({ data }: { data: SurveyData }) {
-  const palette = PALETTE_OPTIONS.find((p) => p.id === data.palette);
-  const tier = PRICE_TIERS.find((t) => t.value === data.priceTier);
-  const rows: Array<[string, React.ReactNode]> = [
-    ["Name", data.fullName || "—"],
-    ["Email", data.email || "—"],
-    ["Location", data.location || "—"],
-    ["Stage", data.businessStage || "—"],
-    ["Services", data.services.join(", ") || "—"],
-    ["Pets served", data.petTypes.join(", ") || "—"],
-    ["Price tier", tier?.label ?? "—"],
-    ["Personality", data.personality.join(", ") || "—"],
-    ["Logo styles", data.logoStyles.join(", ") || "—"],
-    ["Imagery", data.imagery.join(", ") || "—"],
-    [
-      "Palette",
-      palette ? (
-        <span className="inline-flex items-center gap-2">
-          <span className="inline-flex gap-0.5">
-            {palette.colors.map((c) => (
-              <span
-                key={c}
-                className="h-4 w-4 rounded-sm border border-derby-line"
-                style={{ background: c }}
-              />
-            ))}
-          </span>
-          {palette.name}
-        </span>
-      ) : (
-        "—"
-      ),
-    ],
-    ["Tagline", data.tagline || "—"],
-    ["Tones", data.toneAdjectives.join(", ") || "—"],
-    ["Favorite concept", data.logoFavorite || "—"],
-  ];
+  const rated = LOGO_CONCEPTS.map((c) => ({
+    ...c,
+    rating: data.ratings[c.id],
+    isFav: data.favoriteConceptId === c.id,
+  }));
+
   return (
-    <div className="flex flex-col divide-y divide-derby-line rounded-2xl border border-derby-line bg-derby-mist/60 overflow-hidden">
-      {rows.map(([k, v]) => (
-        <div
-          key={k}
-          className="grid grid-cols-[1fr_2fr] gap-4 px-5 py-3 text-sm"
-        >
-          <span className="font-semibold uppercase tracking-[0.1em] text-[11px] text-derby-ink/60 self-start">
-            {k}
-          </span>
-          <span className="text-derby-ink">{v}</span>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col divide-y divide-derby-line rounded-2xl border border-derby-line bg-derby-mist/60 overflow-hidden">
+        <SummaryRow label="Name" value={data.fullName || "—"} />
+        <SummaryRow label="Email" value={data.email || "(not provided)"} />
+        <SummaryRow label="You are" value={data.relationship || "—"} />
+        <SummaryRow label="Vibe picks" value={data.vibes.join(", ") || "—"} />
+        {data.nameSuggestion && (
+          <SummaryRow label="Name idea" value={data.nameSuggestion} />
+        )}
+        <SummaryRow
+          label="Favorite"
+          value={
+            rated.find((r) => r.isFav)?.label ?? "(not picked)"
+          }
+        />
+      </div>
+
+      <div>
+        <div className="text-xs font-bold uppercase tracking-[0.18em] text-derby-ink/60 mb-3">
+          Your ratings
         </div>
-      ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {rated.map((r) => (
+            <div
+              key={r.id}
+              className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
+                r.isFav
+                  ? "border-derby bg-derby-soft"
+                  : "border-derby-line bg-white"
+              }`}
+            >
+              <span className="text-xs font-bold text-derby-ink/60 w-8">
+                {r.label.replace("Concept ", "")}
+              </span>
+              <div className="flex gap-0.5 flex-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <svg
+                    key={i}
+                    viewBox="0 0 24 24"
+                    className={`h-4 w-4 ${
+                      r.rating && r.rating.stars >= i
+                        ? "text-derby"
+                        : "text-derby-line"
+                    }`}
+                    fill="currentColor"
+                  >
+                    <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.8-6.2 3.8 1.6-7L2 9.5l7.1-.6z" />
+                  </svg>
+                ))}
+              </div>
+              {r.isFav && (
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-derby">
+                  ★ Fav
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {data.anythingElse && (
+        <div className="rounded-2xl border border-derby-line bg-white p-5">
+          <div className="text-xs font-bold uppercase tracking-[0.18em] text-derby-ink/60 mb-2">
+            Notes
+          </div>
+          <p className="text-derby-ink">{data.anythingElse}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid grid-cols-[1fr_2fr] gap-4 px-5 py-3 text-sm">
+      <span className="font-semibold uppercase tracking-[0.1em] text-[11px] text-derby-ink/60 self-start">
+        {label}
+      </span>
+      <span className="text-derby-ink">{value}</span>
     </div>
   );
 }
@@ -731,10 +588,10 @@ function FooterMark() {
           Brought to you by
         </span>
         <Image
-          src="/derby-logo.svg"
+          src="/derby-logo.png"
           alt="Derby Digital"
-          width={90}
-          height={28}
+          width={100}
+          height={30}
           style={{ height: "auto" }}
         />
       </div>

@@ -1,69 +1,75 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshDistortMaterial, Environment } from "@react-three/drei";
+import { ContactShadows, Environment, Float } from "@react-three/drei";
 import { useRef } from "react";
-import type { Mesh } from "three";
+import type { Group } from "three";
 
-function BlueOrb() {
-  const mesh = useRef<Mesh>(null);
+/**
+ * Hero 3D: a single, intentional dog bone.
+ * Classic cartoon-bone silhouette (four lobes + shaft), Derby Digital blue
+ * with a clean polished PBR material. Slow rotation + gentle float — no
+ * distortion, no competing objects, no blur. Sits to the right of the
+ * headline so the text stays the hero of the hero.
+ */
+
+function DogBone() {
+  const group = useRef<Group>(null);
+
   useFrame((state) => {
-    if (!mesh.current) return;
+    if (!group.current) return;
     const t = state.clock.elapsedTime;
-    mesh.current.rotation.x = t * 0.15;
-    mesh.current.rotation.y = t * 0.2;
+    group.current.rotation.y = t * 0.35;
+    group.current.rotation.x = Math.sin(t * 0.4) * 0.08;
   });
-  return (
-    <Float speed={1.2} rotationIntensity={0.6} floatIntensity={1.4}>
-      <mesh ref={mesh} position={[0, 0, 0]} scale={1.6}>
-        <icosahedronGeometry args={[1, 4]} />
-        <MeshDistortMaterial
-          color="#1f4dff"
-          distort={0.45}
-          speed={1.6}
-          roughness={0.1}
-          metalness={0.4}
-        />
-      </mesh>
-    </Float>
-  );
-}
 
-function InkTorus() {
-  const mesh = useRef<Mesh>(null);
-  useFrame((state) => {
-    if (!mesh.current) return;
-    const t = state.clock.elapsedTime;
-    mesh.current.rotation.x = Math.sin(t * 0.3) * 0.6;
-    mesh.current.rotation.y = t * 0.25;
-  });
-  return (
-    <Float speed={1.0} rotationIntensity={0.5} floatIntensity={1.8}>
-      <mesh ref={mesh} position={[2.6, -0.6, -1]} scale={0.55}>
-        <torusKnotGeometry args={[1, 0.32, 180, 24]} />
-        <meshStandardMaterial
-          color="#0a0e27"
-          metalness={0.9}
-          roughness={0.25}
-        />
-      </mesh>
-    </Float>
-  );
-}
+  const mat = {
+    color: "#1f4dff",
+    metalness: 0.35,
+    roughness: 0.18,
+    envMapIntensity: 1.1,
+  } as const;
 
-function WhiteCapsule() {
   return (
-    <Float speed={0.8} rotationIntensity={0.3} floatIntensity={1.2}>
-      <mesh position={[-2.3, 1.2, -0.6]} rotation={[0.4, 0.2, -0.3]} scale={0.5}>
-        <capsuleGeometry args={[0.6, 1.2, 8, 24]} />
-        <meshPhysicalMaterial
-          color="#ffffff"
-          roughness={0.15}
-          metalness={0.1}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-        />
-      </mesh>
+    <Float
+      speed={1.1}
+      rotationIntensity={0.15}
+      floatIntensity={1.2}
+      floatingRange={[-0.15, 0.15]}
+    >
+      <group ref={group} rotation={[0.15, -0.2, 0.1]} scale={1.05}>
+        {/* Shaft */}
+        <mesh rotation={[0, 0, Math.PI / 2]} castShadow receiveShadow>
+          <capsuleGeometry args={[0.42, 2.2, 16, 32]} />
+          <meshStandardMaterial {...mat} />
+        </mesh>
+
+        {/* Left end — two lobes */}
+        <mesh position={[-1.42, 0.48, 0]} castShadow>
+          <sphereGeometry args={[0.6, 48, 48]} />
+          <meshStandardMaterial {...mat} />
+        </mesh>
+        <mesh position={[-1.42, -0.48, 0]} castShadow>
+          <sphereGeometry args={[0.6, 48, 48]} />
+          <meshStandardMaterial {...mat} />
+        </mesh>
+
+        {/* Right end — two lobes */}
+        <mesh position={[1.42, 0.48, 0]} castShadow>
+          <sphereGeometry args={[0.6, 48, 48]} />
+          <meshStandardMaterial {...mat} />
+        </mesh>
+        <mesh position={[1.42, -0.48, 0]} castShadow>
+          <sphereGeometry args={[0.6, 48, 48]} />
+          <meshStandardMaterial {...mat} />
+        </mesh>
+
+        {/* Subtle specular highlight sphere — a tiny "shine" dot */}
+        <mesh position={[-0.3, 0.3, 0.45]} scale={0.08}>
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+      </group>
     </Float>
   );
 }
@@ -72,16 +78,29 @@ export default function HeroCanvas() {
   return (
     <Canvas
       dpr={[1, 2]}
-      camera={{ position: [0, 0, 6], fov: 45 }}
+      camera={{ position: [0, 0.3, 6.2], fov: 42 }}
       gl={{ antialias: true, alpha: true }}
+      shadows
       style={{ background: "transparent" }}
     >
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 5, 5]} intensity={1.1} />
-      <directionalLight position={[-3, -2, 2]} intensity={0.5} color="#1f4dff" />
-      <BlueOrb />
-      <InkTorus />
-      <WhiteCapsule />
+      <ambientLight intensity={0.55} />
+      <directionalLight
+        position={[4, 5, 4]}
+        intensity={1.2}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+      />
+      <directionalLight position={[-3, 2, -2]} intensity={0.4} color="#a8b8ff" />
+      <DogBone />
+      <ContactShadows
+        position={[0, -1.4, 0]}
+        opacity={0.35}
+        scale={6}
+        blur={2.4}
+        far={3}
+        color="#1f4dff"
+      />
       <Environment preset="city" />
     </Canvas>
   );

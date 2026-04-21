@@ -10,7 +10,7 @@ export function DerbyBadge({ variant = "header", className = "" }: DerbyBadgePro
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <Image
-          src="/derby-logo.svg"
+          src="/derby-logo.png"
           alt="Derby Digital"
           width={140}
           height={42}
@@ -32,7 +32,7 @@ export function DerbyBadge({ variant = "header", className = "" }: DerbyBadgePro
         </span>
         Powered by{" "}
         <Image
-          src="/derby-logo.svg"
+          src="/derby-logo.png"
           alt="Derby Digital"
           width={70}
           height={22}
@@ -48,7 +48,7 @@ export function DerbyBadge({ variant = "header", className = "" }: DerbyBadgePro
         A Derby Digital project
       </span>
       <Image
-        src="/derby-logo.svg"
+        src="/derby-logo.png"
         alt="Derby Digital"
         width={100}
         height={30}

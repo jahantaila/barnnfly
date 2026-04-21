@@ -43,3 +43,5 @@ next-env.d.ts
 # survey submissions (local dev only — not for commit)
 /submissions
 
+
+.vercel

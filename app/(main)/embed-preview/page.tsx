@@ -16,7 +16,7 @@ export default function EmbedPreview() {
   return (
     <main style={{ maxWidth: 860, margin: "0 auto", padding: "48px 24px", fontFamily: "Georgia, serif", color: "#1a1a1a", background: "#fff" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, color: "#9aa0ab", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.14em" }}>
-        <Image src="/derby-logo.svg" alt="" width={80} height={24} style={{ height: "auto" }} />
+        <Image src="/derby-logo.png" alt="" width={80} height={24} style={{ height: "auto" }} />
         <span>· Sample WordPress host page</span>
       </div>
       <h1 style={{ fontSize: 44, fontFamily: "Georgia, serif", lineHeight: 1.15, margin: "0 0 14px" }}>
