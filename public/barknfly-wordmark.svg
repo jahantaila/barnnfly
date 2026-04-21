@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" fill="none">
+  <defs>
+    <linearGradient id="bf-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1f4dff"/>
+      <stop offset="100%" stop-color="#6b8bff"/>
+    </linearGradient>
+  </defs>
+  <text x="10" y="78" font-family="Arial Black, Helvetica, sans-serif" font-weight="900" font-size="76" letter-spacing="-4" fill="url(#bf-grad)">BARK</text>
+  <text x="210" y="78" font-family="Arial Black, Helvetica, sans-serif" font-weight="900" font-size="76" letter-spacing="-4" fill="#0a0e27">&amp; FLY</text>
+  <text x="12" y="106" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="16" letter-spacing="6" fill="#6b7280">PET RESORT · STARTUP SURVEY</text>
+</svg>

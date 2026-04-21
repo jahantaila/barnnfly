@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f6fb;
+  --foreground: #0a0e27;
+  --derby-blue: #1f4dff;
+  --derby-blue-soft: #e8edff;
+  --derby-ink: #0a0e27;
+  --derby-mist: #f5f6fb;
+  --derby-line: #e4e7f2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-derby: var(--derby-blue);
+  --color-derby-soft: var(--derby-blue-soft);
+  --color-derby-ink: var(--derby-ink);
+  --color-derby-mist: var(--derby-mist);
+  --color-derby-line: var(--derby-line);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-display);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(31, 77, 255, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -5% 30%, rgba(31, 77, 255, 0.06), transparent 55%),
+    var(--background);
+  background-attachment: fixed;
+}
+
+.display {
+  font-family: var(--font-display), "Arial Black", system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid var(--derby-line);
+  background: #ffffff;
+  color: var(--derby-ink);
+}
+
+.chip-blue {
+  background: var(--derby-blue-soft);
+  color: var(--derby-blue);
+  border-color: transparent;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid var(--derby-line);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 1px 0 rgba(10, 14, 39, 0.02),
+    0 20px 60px -30px rgba(31, 77, 255, 0.25);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3.25rem;
+  padding: 0 1.75rem;
+  border-radius: 999px;
+  background: var(--derby-ink);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.btn-primary:hover {
+  background: var(--derby-blue);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3.25rem;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--derby-ink);
+  font-weight: 600;
+  border: 1px solid var(--derby-line);
+  transition: background 0.15s ease;
+}
+.btn-ghost:hover {
+  background: #ffffff;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--derby-line);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  font-size: 1rem;
+  color: var(--derby-ink);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input:focus,
+.textarea:focus {
+  border-color: var(--derby-blue);
+  box-shadow: 0 0 0 4px rgba(31, 77, 255, 0.12);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--derby-line);
+  border-radius: 1rem;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+}
+.option:hover {
+  border-color: var(--derby-blue);
+  transform: translateY(-1px);
+}
+.option[data-selected="true"] {
+  border-color: var(--derby-blue);
+  background: var(--derby-blue-soft);
+  box-shadow: 0 0 0 3px rgba(31, 77, 255, 0.12);
+}
+
+.grainy::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.04  0 0 0 0 0.05  0 0 0 0 0.15  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  z-index: 1;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+.float-slow { animation: float-slow 7s ease-in-out infinite; }
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.45; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
