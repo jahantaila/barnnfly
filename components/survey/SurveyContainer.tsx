@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { DerbyBadge } from "@/components/DerbyBadge";
+import { Hero } from "@/components/Hero";
 import { ProgressBar } from "./ProgressBar";
 import { StepShell } from "./StepShell";
 import { OptionGrid } from "./OptionGrid";
@@ -19,13 +19,6 @@ import {
   type StepId,
   type SurveyData,
 } from "@/lib/survey-config";
-
-const HeroCanvas = dynamic(() => import("@/components/three/HeroCanvas"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full rounded-3xl bg-gradient-to-br from-derby-soft via-white to-derby-mist" />
-  ),
-});
 
 const STORAGE_KEY = "barknfly_survey_v2";
 
@@ -125,14 +118,14 @@ export function SurveyContainer() {
       <TopNav />
 
       {step === "intro" ? (
-        <IntroHero onStart={() => setStep("about-you")} />
+        <Hero onStart={() => setStep("about-you")} />
       ) : (
-        <main className="flex-1 w-full max-w-5xl mx-auto px-6 md:px-10 py-10 md:py-14 relative z-10">
+        <main className={`flex-1 w-full ${step === "rate-logos" ? "max-w-6xl" : "max-w-4xl"} mx-auto px-4 sm:px-6 md:px-10 py-10 md:py-14 relative z-10`}>
           <div className="mb-8">
             <ProgressBar current={step} />
           </div>
 
-          <div className="card p-6 sm:p-10">
+          <div className={`card ${step === "rate-logos" ? "p-4 sm:p-6" : "p-6 sm:p-10"}`}>
             <motion.div
               key={step}
               initial={{ opacity: 0, y: 12 }}
@@ -304,104 +297,6 @@ function TopNav() {
         </div>
       </div>
     </header>
-  );
-}
-
-function IntroHero({ onStart }: { onStart: () => void }) {
-  return (
-    <main className="flex-1 relative overflow-hidden">
-      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 pt-10 md:pt-16 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-[1.15fr_1fr] gap-10 md:gap-12 items-center">
-          {/* Text column */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex flex-col gap-6"
-          >
-            <DerbyBadge variant="inline" className="self-start" />
-            <h1 className="display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] text-derby-ink">
-              Help pick our
-              <br />
-              <span className="text-derby">logo.</span>
-            </h1>
-            <p className="max-w-xl text-lg md:text-xl text-derby-ink/70 leading-relaxed">
-              We&apos;re launching <strong>Bark &amp; Fly Pet Resort</strong>,
-              and we need your eye. Rate the logo concepts, pick your
-              favorite, and tell us the vibe. Takes about 3 minutes.
-            </p>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
-              <button className="btn-primary" onClick={onStart}>
-                Start rating →
-              </button>
-              <span className="text-sm text-derby-ink/60">
-                4 steps · ~3 minutes · auto-saves
-              </span>
-            </div>
-          </motion.div>
-
-          {/* 3D column */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-            className="relative h-[320px] md:h-[460px] order-first md:order-last"
-          >
-            <div className="absolute inset-0">
-              <HeroCanvas />
-            </div>
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-[0.22em] text-derby-ink/40">
-              Bark &amp; Fly
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Feature row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="mt-14 md:mt-20 grid grid-cols-1 sm:grid-cols-3 gap-4"
-        >
-          {[
-            {
-              num: "01",
-              label: "Rate 5 logo sets",
-              desc: "Star-rate each one, jot a quick thought.",
-            },
-            {
-              num: "02",
-              label: "Pick your favorite",
-              desc: "One logo to rule them all.",
-            },
-            {
-              num: "03",
-              label: "Call the vibe",
-              desc: "What should the brand feel like?",
-            },
-          ].map((row) => (
-            <div
-              key={row.num}
-              className="card p-5 flex gap-4 items-start"
-            >
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-derby">
-                {row.num}
-              </span>
-              <div>
-                <div className="font-bold text-derby-ink">{row.label}</div>
-                <div className="text-sm text-derby-ink/60 mt-0.5">
-                  {row.desc}
-                </div>
-              </div>
-            </div>
-          ))}
-        </motion.div>
-
-        <div className="mt-12 flex justify-center">
-          <FooterMark />
-        </div>
-      </div>
-    </main>
   );
 }
 

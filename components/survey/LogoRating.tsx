@@ -46,7 +46,7 @@ export function LogoRatingStep({
           >
             {/* Header row */}
             <div className="flex items-start justify-between gap-3 p-5 sm:p-6 border-b border-derby-line">
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
                 <span className="chip shrink-0">
                   {String(idx + 1).padStart(2, "0")}
                 </span>
@@ -61,12 +61,22 @@ export function LogoRatingStep({
                   )}
                 </div>
               </div>
-              {isFav && (
-                <div className="chip chip-blue shrink-0">★ Your favorite</div>
-              )}
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                {c.teamPick && (
+                  <div className="chip bg-derby-ink text-white border-transparent">
+                    ★ {c.teamPick}&apos;s pick
+                  </div>
+                )}
+                {isFav && (
+                  <div className="chip chip-blue">★ Your favorite</div>
+                )}
+              </div>
             </div>
 
-            {/* Big image */}
+            {/* Big image — full card width, no height cap. On mobile,
+                multi-variant sheets get a horizontal-scroll container so
+                each sub-logo stays readable even when a single sheet packs
+                3–4 logos side-by-side. */}
             <div className="relative w-full bg-derby-mist border-b border-derby-line">
               {errored ? (
                 <div className="aspect-[16/9] flex flex-col items-center justify-center gap-2 text-derby-ink/40 text-center p-6">
@@ -89,15 +99,28 @@ export function LogoRatingStep({
                   </span>
                 </div>
               ) : (
-                <div className="relative w-full min-h-[320px] sm:min-h-[480px] md:min-h-[560px] flex items-center justify-center p-4 sm:p-8">
+                <div
+                  className={`relative w-full flex items-center justify-center p-3 sm:p-6 ${
+                    hasMultiple ? "overflow-x-auto" : ""
+                  }`}
+                >
                   <Image
                     src={c.src}
                     alt={c.label}
-                    width={1400}
-                    height={900}
+                    width={2400}
+                    height={1800}
                     priority={idx < 2}
-                    className="max-w-full h-auto max-h-[600px] w-auto object-contain"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1100px"
+                    className="h-auto max-w-full"
+                    style={{
+                      // Enforce a minimum rendered width on mobile for
+                      // multi-variant sheets so each sub-logo is readable.
+                      // Falls back to natural w-full on sm: and up.
+                      minWidth: hasMultiple
+                        ? minWidthForVariants(c.variantCount)
+                        : undefined,
+                      width: hasMultiple ? undefined : "100%",
+                    }}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1400px) 92vw, 1300px"
                     onError={() =>
                       setImgError((s) => ({ ...s, [c.id]: true }))
                     }
@@ -105,8 +128,13 @@ export function LogoRatingStep({
                 </div>
               )}
               {hasMultiple && (
-                <div className="absolute top-4 right-4 chip bg-derby-ink text-white border-transparent">
+                <div className="absolute top-4 right-4 chip bg-derby-ink text-white border-transparent shadow-lg">
                   {c.variantCount} variants
+                </div>
+              )}
+              {hasMultiple && (
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:hidden chip text-[10px] bg-white/90 shadow-md">
+                  ← swipe to see each logo →
                 </div>
               )}
             </div>
@@ -181,6 +209,14 @@ export function LogoRatingStep({
       })}
     </div>
   );
+}
+
+function minWidthForVariants(count: number) {
+  // Target ~230–260px per sub-logo on mobile so each remains readable.
+  if (count <= 1) return undefined;
+  if (count === 2) return "520px";
+  if (count === 3) return "720px";
+  return "880px"; // 4+ variants
 }
 
 const STAR_LABELS: Record<number, string> = {

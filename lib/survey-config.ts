@@ -86,6 +86,7 @@ export type LogoConcept = {
   label: string;
   description?: string;
   variantCount: number;
+  teamPick?: string; // name of a team member who picked this as their favorite
 };
 
 export const LOGO_CONCEPTS: LogoConcept[] = [
@@ -96,6 +97,7 @@ export const LOGO_CONCEPTS: LogoConcept[] = [
     description:
       "Full illustration — golden retriever in aviator gear flying a vintage plane. 'Bark N Fly Resort' wordmark below with luggage tags.",
     variantCount: 1,
+    teamPick: "Jason",
   },
   {
     id: "set-02",
@@ -128,5 +130,6 @@ export const LOGO_CONCEPTS: LogoConcept[] = [
     description:
       "Circular badge: golden retriever popping out of a plane, framed by 'BARK N FLY · PET RESORT' and a small bone.",
     variantCount: 1,
+    teamPick: "Jahan",
   },
 ];
