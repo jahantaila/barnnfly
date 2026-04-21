@@ -44,31 +44,30 @@ export function LogoRatingStep({
               isFav ? "ring-4 ring-derby ring-offset-2" : ""
             }`}
           >
-            {/* Header row */}
-            <div className="flex items-start justify-between gap-3 p-5 sm:p-6 border-b border-derby-line">
-              <div className="flex items-start gap-3 flex-1 min-w-0">
-                <span className="chip shrink-0">
+            {/* Header — chips always wrap on their own row above title so
+                mobile (narrow) never squeezes the title into the badges. */}
+            <div className="flex flex-col gap-3 p-5 sm:p-6 border-b border-derby-line">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="chip">
                   {String(idx + 1).padStart(2, "0")}
                 </span>
-                <div>
-                  <div className="font-bold text-derby-ink text-lg leading-tight">
-                    {c.label}
-                  </div>
-                  {c.description && (
-                    <div className="text-sm text-derby-ink/60 mt-1 max-w-2xl leading-relaxed">
-                      {c.description}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2 shrink-0">
                 {c.teamPick && (
-                  <div className="chip bg-derby-ink text-white border-transparent">
+                  <span className="chip bg-derby-ink text-white border-transparent">
                     ★ {c.teamPick}&apos;s pick
-                  </div>
+                  </span>
                 )}
                 {isFav && (
-                  <div className="chip chip-blue">★ Your favorite</div>
+                  <span className="chip chip-blue">★ Your favorite</span>
+                )}
+              </div>
+              <div>
+                <div className="font-bold text-derby-ink text-lg leading-tight">
+                  {c.label}
+                </div>
+                {c.description && (
+                  <div className="text-sm text-derby-ink/60 mt-1.5 max-w-2xl leading-relaxed">
+                    {c.description}
+                  </div>
                 )}
               </div>
             </div>
